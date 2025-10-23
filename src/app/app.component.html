@@ -1,0 +1,27 @@
+<div class="app-container">
+  <header class="app-header">
+    <div class="container">
+      <div class="header-content">
+        <h1 class="logo">
+          <i class="fas fa-motorcycle"></i>
+          Italika
+        </h1>
+        <nav>
+          <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+            Nueva Cotización
+          </a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <router-outlet></router-outlet>
+  </main>
+
+  <footer class="app-footer">
+    <div class="container">
+      <p>&copy; 2025 Italika. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+</div>

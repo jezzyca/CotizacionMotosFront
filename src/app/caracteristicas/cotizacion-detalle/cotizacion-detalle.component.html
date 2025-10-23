@@ -1,0 +1,179 @@
+<div class="container">
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border" role="status">
+      <span class="sr-only">Cargando...</span>
+    </div>
+    <p>Cargando cotización...</p>
+  </div>
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+    <button class="btn btn-primary mt-3" (click)="nuevaCotizacion()">
+      Volver al inicio
+    </button>
+  </div>
+  <div *ngIf="cotizacion && !loading" class="cotizacion-detalle">  
+    <div class="cotizacion-header no-print">
+      <h1>Cotización #{{ cotizacion?.idCotizacion }}</h1>
+      <div class="acciones">
+        <button class="btn btn-secondary" (click)="imprimirCotizacion()">
+          <i class="fas fa-print"></i> Imprimir
+        </button>
+        <button class="btn btn-primary" (click)="nuevaCotizacion()">
+          <i class="fas fa-plus"></i> Nueva Cotización
+        </button>
+      </div>
+    </div>
+    <div class="cotizacion-documento">
+      <div class="empresa-header">
+        <h1>COTIZACIÓN DE MOTOCICLETA</h1>
+        <p class="fecha">Fecha: {{ formatearFecha(cotizacion?.fechaCotizacion) }}</p>
+        <p class="numero-cotizacion">Cotización No. {{ cotizacion?.idCotizacion }}</p>
+      </div>
+      <div class="seccion">
+        <h2>Datos del Cliente</h2>
+        <div class="info-grid">
+          <div class="info-item">
+            <strong>Nombre:</strong>
+            <span>{{ cotizacion?.cliente?.nombre }}</span>
+          </div>
+          <div class="info-item">
+            <strong>Teléfono:</strong>
+            <span>{{ cotizacion?.cliente?.telefono }}</span>
+          </div>
+          <div class="info-item">
+            <strong>Correo:</strong>
+            <span>{{ cotizacion?.cliente?.email }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="seccion">
+        <h2>Motocicleta</h2>
+        <div class="moto-info-detalle">
+          <h3>{{ cotizacion?.modelo }}</h3>
+          <p class="version">{{ cotizacion?.version }}</p>
+        </div>
+      </div>
+      <div class="seccion">
+        <h2>Desglose de Costos</h2>
+        <table class="tabla-costos">
+          <tbody>
+            <tr>
+              <td>Precio del Producto (sin IVA)</td>
+              <td class="text-right">${{ cotizacion?.costos?.precioSinIva | number:'1.2-2' }}</td>
+            </tr>
+            <tr>
+              <td>IVA (16%)</td>
+              <td class="text-right">${{ cotizacion?.costos?.iva | number:'1.2-2' }}</td>
+            </tr>
+            <tr class="subtotal">
+              <td>Precio con IVA</td>
+              <td class="text-right">${{ cotizacion?.costos?.precioConIva | number:'1.2-2' }}</td>
+            </tr>
+            <tr>
+              <td>Gastos Administrativos</td>
+              <td class="text-right">${{ cotizacion?.costos?.gastosAdministrativos | number:'1.2-2' }}</td>
+            </tr>
+            <tr>
+              <td>Seguro del Vehículo</td>
+              <td class="text-right">${{ cotizacion?.costos?.costoSeguro | number:'1.2-2' }}</td>
+            </tr>
+            <tr *ngIf="cotizacion.costos.costoAccesorios > 0">
+              <td>Accesorios</td>
+              <td class="text-right">${{ cotizacion?.costos?.costoAccesorios | number:'1.2-2' }}</td>
+            </tr>
+            <tr class="total">
+              <td><strong>COSTO TOTAL</strong></td>
+              <td class="text-right"><strong>${{ cotizacion?.costoTotal | number:'1.2-2' }}</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="seccion" *ngIf="cotizacion.accesorios && cotizacion.accesorios.length > 0">
+        <h2>Accesorios Incluidos</h2>
+        <table class="tabla-accesorios">
+          <thead>
+            <tr>
+              <th>Accesorio</th>
+              <th>Descripción</th>
+              <th class="text-center">Cantidad</th>
+              <th class="text-right">Precio Unit.</th>
+              <th class="text-right">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let accesorio of cotizacion.accesorios">
+              <td>{{ accesorio.nombre }}</td>
+              <td>{{ accesorio.descripcion }}</td>
+              <td class="text-center">{{ accesorio.cantidad }}</td>
+              <td class="text-right">${{ accesorio.precio | number:'1.2-2' }}</td>
+              <td class="text-right">${{ accesorio.subtotal | number:'1.2-2' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="seccion">
+        <h2>Información de Financiamiento</h2>
+        <div class="financiamiento-resumen">
+          <div class="fin-item">
+            <strong>Costo Total:</strong>
+            <span>${{ cotizacion?.costoTotal | number:'1.2-2' }}</span>
+          </div>
+          <div class="fin-item destacado">
+            <strong>Enganche ({{ cotizacion?.porcentajeEnganche }}%):</strong>
+            <span>${{ cotizacion?.montoEnganche | number:'1.2-2' }}</span>
+          </div>
+          <div class="fin-item">
+            <strong>Monto a Financiar:</strong>
+            <span>${{ cotizacion?.montoFinanciar | number:'1.2-2' }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="seccion">
+        <h2>Proyección de Mensualidades</h2>
+        <p class="nota-tasa">Tasa de interés fija: 12.5% anual | Sin comisión por apertura</p>
+        
+        <table class="tabla-mensualidades">
+          <thead>
+            <tr>
+              <th>Plazo</th>
+              <th class="text-right">Pago Mensual</th>
+              <th class="text-right">Total de Intereses</th>
+              <th class="text-right">Total a Pagar</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let opcion of cotizacion.opcionesFinanciamiento" 
+                [class.destacado]="opcion.plazoMeses === 48">
+              <td><strong>{{ opcion.plazoMeses }} meses</strong></td>
+              <td class="text-right pago-mensual">
+                ${{ opcion.pagoMensual | number:'1.2-2' }}
+              </td>
+              <td class="text-right">
+                ${{ opcion.totalIntereses | number:'1.2-2' }}
+              </td>
+              <td class="text-right">
+                ${{ opcion.totalPagar | number:'1.2-2' }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="seccion terminos">
+        <h3>Términos y Condiciones</h3>
+        <ul>
+          <li>Esta cotización tiene una vigencia de 15 días a partir de la fecha de emisión.</li>
+          <li>Los precios están sujetos a cambios sin previo aviso.</li>
+          <li>El enganche mínimo es del 10% del valor total de la motocicleta.</li>
+          <li>La tasa de interés es fija durante todo el plazo del financiamiento.</li>
+          <li>No se cobra comisión por apertura de crédito.</li>
+          <li>Sujeto a aprobación de crédito.</li>
+          <li>La disponibilidad del modelo está sujeta a existencias.</li>
+        </ul>
+      </div>
+      <div class="footer-cotizacion">
+        <p>Para más información o para proceder con la compra, por favor contacte a nuestro equipo de ventas.</p>
+        <p class="contacto"><strong>Teléfono:</strong> (55) 1234-5678 | <strong>Email:</strong> ventas&#64;motos.com</p>
+      </div>
+    </div>
+  </div>
+</div>
